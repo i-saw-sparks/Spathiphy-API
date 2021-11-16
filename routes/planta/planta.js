@@ -47,28 +47,47 @@ app.get("/:id", (req, res) => {
 
 app.get("/:id/config", (req, res) => {
     const database = req.app.get("db");
-    database.collection(COLLECTION_NAME).findOne({ id_micro: req.body.id_micro }, function (error, data) {
+    database.collection(COLLECTION_NAME).findOne({ id_micro: req.params.id }, function (error, data) {
         if (error) {
             req.app.get("errManager")(res, err.message, "Failed to get planta.");
         } else {
-            config = {
-                max_temp: data.max_temp,
-                min_temp: data.min_temp,
-                max_hum: data.max_hum,
-                min_hum: data.min_hum
+            if (data) {
+                config = {
+                    max_temp: data.max_temp,
+                    min_temp: data.min_temp,
+                    max_hum: data.max_hum,
+                    min_hum: data.min_hum
+                }
+                res.status(200).json(config);
+            } else {
+                req.app.get("errManager")(res, err.message, "planta id:" + req.params.id);
             }
-            res.status(200).json(config);
         }
     })
 })
 
 app.put("/:id", function (req, res) {
+    const database = req.app.get("db");
     let status = {
         version: "0.1",
         env: "TEST"
     }
+
+    record = {
+        last_rec: req.body
+    }
+
+    let newData = { $set: record };
     console.log(req.body);
-    res.status(200).json(status);
+    database.collection(COLLECTION_NAME).updateOne({ id_micro: req.params.id }, newData, (error, result) => {
+        if (error) {
+            manageError(res, error.message, "Failed to update planta.");
+            return;
+        } else {
+            res.status(200).send(status);
+            return;
+        }
+    })
 });
 
 module.exports = app;
