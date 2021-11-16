@@ -7,21 +7,20 @@ var app = express();
 var distDir = __dirname + "/dist/";
 app.use(express.static(distDir));
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+    extended: true
+}));
+
 const LOCAL_DATABASE = "mongodb://localhost:27017/Spathiphy-db";
 LOCAL_PORT = 3000;
 
 var database;
 
-let registerRoutes = () => {
-    require('./status')(app, database, manageError);
-}
-
 let manageError = (res, reason, message, code) => {
     console.log("Error: " + reason);
     res.status(code || 500).json({ "error": message });
 }
-
-registerRoutes();
 
 mongobd.MongoClient.connect(process.env.MONGODB_URI || LOCAL_DATABASE,
     {
@@ -36,7 +35,9 @@ mongobd.MongoClient.connect(process.env.MONGODB_URI || LOCAL_DATABASE,
         database = client.db();
         console.log("Database connection done.");
 
-        registerRoutes();
+        app.set("errManager", manageError);
+        app.set("db", database);
+        require("./startup/mainRouter")(app);
 
         var server = app.listen(process.env.PORT || LOCAL_PORT, function () {
             var port = server.address().port;
