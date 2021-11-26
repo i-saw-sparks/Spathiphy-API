@@ -36,7 +36,7 @@ app.post("/", function (req, res) {
 
 app.get("/:id", (req, res) => {
     const database = req.app.get("db");
-    database.collection(COLLECTION_NAME).findOne({ id_micro: req.body.id_micro }, function (error, data) {
+    database.collection(COLLECTION_NAME).findOne({ id_micro: req.params.id_micro }, function (error, data) {
         if (error) {
             req.app.get("errManager")(res, err.message, "Failed to get planta.");
         } else {

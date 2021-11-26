@@ -17,7 +17,7 @@ app.post("/", function (req, res) {
         return;
     }
 
-    database.collection(COLLECTION_NAME).findOne({ nombre: user.username }, function (error, data) {
+    database.collection(COLLECTION_NAME).findOne({ username: user.username }, function (error, data) {
         if (data) {
             res.status(400).json({ msg: "Este usuario ya existe" });
             return;
@@ -45,6 +45,17 @@ app.get("/", function (req, res) {
         }
     })
 });
+
+app.get("/:id", ()=>{
+    const database = req.app.get("db");
+    database.collection(COLLECTION_NAME).findOne({username: req.params.id}, (error, data) => {
+        if (error) {
+            req.app.get("errManager")(res, err.message, "Error getting user");
+        } else {
+            res.status(200).json(data);
+        }
+    })
+})
 
 
 module.exports = app;
