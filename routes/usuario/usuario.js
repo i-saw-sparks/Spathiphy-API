@@ -17,14 +17,14 @@ app.post("/", function (req, res) {
         return;
     }
 
-    database.collection(COLLECTION_NAME).findOne({ username: user.username }, function (error, data) {
+    database.collection(COLLECTION_NAME).findOne({ username: user.username }, (error, data) =>{
         if (data) {
             res.status(400).json({ msg: "Este usuario ya existe" });
             return;
         } else {
             user.password = bcrypt.hashSync(user.password, bcrypt.genSaltSync(10));
 
-            database.collection(COLLECTION_NAME).insertOne(user, function (err, doc) {
+            database.collection(COLLECTION_NAME).insertOne(user,  (err, doc) => {
                 if (err) {
                     req.app.get("errManager")(res, err.message, "Failed to create new user.");
                 } else {

@@ -22,6 +22,8 @@ let manageError = (res, reason, message, code) => {
     res.status(code || 500).json({ "error": message });
 }
 
+
+
 mongobd.MongoClient.connect(process.env.MONGODB_URI || LOCAL_DATABASE,
     {
         useUnifiedTopology: true,
@@ -43,6 +45,66 @@ mongobd.MongoClient.connect(process.env.MONGODB_URI || LOCAL_DATABASE,
             var port = server.address().port;
             console.log("App now running on port ", port);
         });
+
+        var minutes = 5, the_interval = minutes * 60 * 1000;
+        setInterval(updateHistorics, the_interval);
+
+
+        function updateHistorics() {
+            database.collection("Planta").find({}).toArray(function (error, data) {
+                if (error) {
+                    console.log(error)
+                }
+                data.forEach(planta => {
+                    database.collection("Historial").findOne({ planta_id: planta._id }, function (error, data) {
+                        if (error) {
+                            console.log(error)
+                            return;
+                        }
+                        if (data == null) {
+                            let hist = {
+                                planta_id: planta._id,
+                                mediciones: []
+                            }
+                            database.collection("Historial").insertOne(hist, (err, doc) => {
+                                if (err) {
+                                    console.log(err);
+                                    return;
+                                } else {
+                                    console.log("Historial inicializado de: " + planta.id);
+                                    console.log(doc);
+                                }
+                            })
+                        } else {
+                            if (data.mediciones.length > 2017) {
+                                for (let i = 0; i < data.records.length - 2017; i++) {
+                                    let toDelete = { $pop: { mediciones: -1 } };
+                                    database.collection("Historial").updateOne({ planta_id: planta._id }, toDelete, function (error, result) {
+                                        if (error) {
+                                            console.log("Error in pop record");
+                                        }
+                                    })
+                                }
+                            }
+
+                            newRecord = {};
+                            newRecord.humedad = planta.last_rec.humedad;
+                            newRecord.temperatura = planta.last_rec.temperatura;
+                            newRecord.luminosidad = planta.last_rec.luminosidad;
+                            newRecord.recTime = Date.now();
+
+                            var toInsert = { $push: { mediciones: newRecord } };
+
+                            database.collection("Historial").updateOne({ planta_id: planta._id }, toInsert, function (error, result) {
+                                if (error) {
+                                    console.log("Error in push record");
+                                }
+                            })
+                        }
+                    })
+                });
+            })
+        }
     });
 
 
