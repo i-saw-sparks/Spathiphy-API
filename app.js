@@ -1,6 +1,7 @@
 var express = require("express");
 var bodyParser = require("body-parser");
 var mongobd = require("mongodb");
+var cors = require("cors");
 
 var app = express();
 
@@ -11,6 +12,18 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+app.use(cors({}))
+/*
+app.use((req, res, next) => {
+    let ip = req.ip;
+    ip = ip.substr(ip.lastIndexOf(':') + 1);
+    console.table([{ Timestamp: new Date().toLocaleString(), Method: req.method, Request: req.originalUrl, Client: ip }]);
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    next();
+});
+*/
 
 const LOCAL_DATABASE = "mongodb://localhost:27017/Spathiphy-db";
 LOCAL_PORT = 3000;
@@ -76,8 +89,8 @@ mongobd.MongoClient.connect(process.env.MONGODB_URI || LOCAL_DATABASE,
                                 }
                             })
                         } else {
-                            if (data.mediciones.length > 2017) {
-                                for (let i = 0; i < data.records.length - 2017; i++) {
+                            if (data.mediciones.length > 288) {
+                                for (let i = 0; i < data.records.length - 288; i++) {
                                     let toDelete = { $pop: { mediciones: -1 } };
                                     database.collection("Historial").updateOne({ planta_id: planta._id }, toDelete, function (error, result) {
                                         if (error) {
@@ -88,9 +101,11 @@ mongobd.MongoClient.connect(process.env.MONGODB_URI || LOCAL_DATABASE,
                             }
 
                             newRecord = {};
-                            newRecord.humedad = planta.last_rec.humedad;
-                            newRecord.temperatura = planta.last_rec.temperatura;
-                            newRecord.luminosidad = planta.last_rec.luminosidad;
+                            if (planta.last_rec) {
+                                newRecord.humedad = planta.last_rec.humedad;
+                                newRecord.temperatura = planta.last_rec.temperatura;
+                                newRecord.luminosidad = planta.last_rec.luminosidad;
+                            }
                             newRecord.recTime = Date.now();
 
                             var toInsert = { $push: { mediciones: newRecord } };
