@@ -102,11 +102,8 @@ mongobd.MongoClient.connect(process.env.MONGODB_URI || LOCAL_DATABASE,
 
                             newRecord = {};
                             if (planta.last_rec) {
-                                newRecord.humedad = planta.last_rec.humedad;
-                                newRecord.temperatura = planta.last_rec.temperatura;
-                                newRecord.luminosidad = planta.last_rec.luminosidad;
+                                newRecord = planta.last_rec
                             }
-                            newRecord.recTime = Date.now();
 
                             var toInsert = { $push: { mediciones: newRecord } };
 
