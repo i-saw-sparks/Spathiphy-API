@@ -1,4 +1,5 @@
 var express = require("express");
+const io = require('./sockets');
 var bodyParser = require("body-parser");
 var mongobd = require("mongodb");
 var cors = require("cors");
@@ -13,17 +14,7 @@ app.use(bodyParser.urlencoded({
     extended: true
 }));
 app.use(cors({}))
-/*
-app.use((req, res, next) => {
-    let ip = req.ip;
-    ip = ip.substr(ip.lastIndexOf(':') + 1);
-    console.table([{ Timestamp: new Date().toLocaleString(), Method: req.method, Request: req.originalUrl, Client: ip }]);
-    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    next();
-});
-*/
+
 
 const LOCAL_DATABASE = "mongodb://localhost:27017/Spathiphy-db";
 LOCAL_PORT = 3000;
@@ -58,6 +49,8 @@ mongobd.MongoClient.connect(process.env.MONGODB_URI || LOCAL_DATABASE,
             var port = server.address().port;
             console.log("App now running on port ", port);
         });
+
+        io.attach(server);
 
         var minutes = 5, the_interval = minutes * 60 * 1000;
         setInterval(updateHistorics, the_interval);

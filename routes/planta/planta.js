@@ -3,6 +3,7 @@ const express = require('express');
 const app = express();
 const jwt = require('express-jwt');
 const { JWT_KEY } = require("../../keys/keys");
+const { Socket, getClientsWatchingId } = require('../../sockets');
 
 const COLLECTION_NAME = "Planta"
 
@@ -107,7 +108,21 @@ app.put("/:id", function (req, res) {
     }
 
     let newData = { $set: record };
-    console.log(req.body);
+    
+    const message = record;
+    const id = req.params.id ;
+    
+    if(id){
+        console.log('Searching for watchers...')
+        const watchers = getClientsWatchingId(id);
+
+        console.log(watchers);
+        watchers.forEach(w => {
+            Socket.emitSpecific(w.SocketId, 'plantUpdate', { payload: record });
+        });
+
+    }
+
     database.collection(COLLECTION_NAME).updateOne({ id_micro: req.params.id }, newData, (error, result) => {
         if (error) {
             manageError(res, error.message, "Failed to update planta.");
