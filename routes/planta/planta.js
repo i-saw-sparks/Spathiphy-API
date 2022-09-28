@@ -67,7 +67,11 @@ app.get("/:id/config", (req, res) => {
                     max_temp: data.max_temp,
                     min_temp: data.min_temp,
                     max_hum: data.max_hum,
-                    min_hum: data.min_hum
+                    min_hum: data.min_hum,
+                    max_humt: data.max_humt,
+                    min_humt: data.min_humt,
+                    max_lum: data.max_lum,
+                    min_lum: data.min_lum
                 }
                 res.status(200).json(config);
             } else {
@@ -83,7 +87,11 @@ app.put("/settings/:id", (req, res)=>{
         min_hum:parseInt(req.body.min_hum),
         max_hum:parseInt(req.body.max_hum),
         max_temp:parseInt(req.body.max_temp),
-        min_temp:parseInt(req.body.min_temp)
+        min_temp:parseInt(req.body.min_temp),
+        min_hum:parseInt(req.body.min_humt),
+        max_hum:parseInt(req.body.max_humt),
+        max_temp:parseInt(req.body.max_lum),
+        min_temp:parseInt(req.body.min_lum)
     }
     let newData = { $set: dataSet };
     console.log(req.body);
