@@ -83,7 +83,7 @@ mongobd.MongoClient.connect(process.env.MONGODB_URI || LOCAL_DATABASE,
                             })
                         } else {
                             if (data.mediciones.length > 288) {
-                                for (let i = 0; i < data.records.length - 288; i++) {
+                                for (let i = 0; i < data.mediciones.length - 288; i++) {
                                     let toDelete = { $pop: { mediciones: -1 } };
                                     database.collection("Historial").updateOne({ planta_id: planta._id }, toDelete, function (error, result) {
                                         if (error) {

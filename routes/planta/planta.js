@@ -69,7 +69,10 @@ app.get("/:id/config", (req, res) => {
                     max_hum: data.max_hum,
                     min_hum: data.min_hum,
                     max_humt: data.max_humt,
-                    max_lum: data.max_lum
+                    max_lum: data.max_lum,
+                    min_humt: data.min_humt,
+                    min_lum: data.min_lum,
+                    name:data.name
                 }
                 res.status(200).json(config);
             } else {
@@ -86,8 +89,12 @@ app.put("/settings/:id", (req, res)=>{
         max_hum:parseInt(req.body.max_hum),
         max_temp:parseInt(req.body.max_temp),
         min_temp:parseInt(req.body.min_temp),
+        min_humt:parseInt(req.body.min_humt),
         max_humt:parseInt(req.body.max_humt),
+        min_lum:parseInt(req.body.min_lum),
         max_lum:parseInt(req.body.max_lum),
+        icon:req.body.icon,
+        name:req.body.name
     }
     let newData = { $set: dataSet };
     console.log(req.body);
@@ -104,7 +111,7 @@ app.put("/settings/:id", (req, res)=>{
 
 app.put("/:id", function (req, res) {
     const database = req.app.get("db");
-    
+    console.log(req.body)
     req.body.recTime = Date.now();
 
     record = {
